@@ -3,8 +3,7 @@ import argparse
 from datetime import datetime
 
 from get_ip_info import get_ip_info
-
-
+from collections import Counter
 def date_time_parser(date_time):
     # DateTime formatiga o'girish
     parsed_time = datetime.strptime(date_time, "%d/%b/%Y:%H:%M:%S %z")
@@ -13,7 +12,14 @@ def date_time_parser(date_time):
     return formatted_date
 
 def access_log():
+    # request counter
+    counter = 0
+    ip_counter = Counter()
+
+
     parser = argparse.ArgumentParser(description="Filter log by IP address and date")
+    parser.add_argument("-c",type=str, metavar="--counter", help="all ip addresses request counter ")
+    parser.add_argument("-r",type=str, metavar="--request", help="Requests type post or get ")
     parser.add_argument("-p",type=str, metavar="--path", help="Log file path input")
     parser.add_argument("-ip",type=str, metavar="--ipaddress", help="IP address to filter")
     parser.add_argument("-dt",type=str, metavar="--datetime", help="DataTime to filter example '2021-08-10'")
@@ -29,32 +35,51 @@ def access_log():
         r'\d+\s+"(?P<http>[^"]+)"',
         re.MULTILINE
     )
-    # request counter
-    counter = 0
 
-    with open(args.p,'r', encoding='utf-8') as file:
-        for line in file:
-            match = log_pattern.search(line)
-            if match:
-                data = match.groupdict()
-                ip_match = args.ip is None or args.ip == data['ip']
-                log_datetime = date_time_parser(data['datetime'])
-                time_match = args.dt is None or args.dt == log_datetime
-                if ip_match and time_match:
-                    counter += 1
-                    print(f"DateTime: {data['datetime']}")
-                    print(f"IP: {data['ip']}")
-                    print(f"Request: {data['request']}")
-                    print(f"Http: {data['http']}")
-                    print(f"Status: {data['status']}")
-                    print('-'*90)
+    try:
+        with open(args.p,'r', encoding='utf-8') as file:
+            for line in file:
+                match = log_pattern.search(line)
+                if match:
 
-            else:
-                print("No match")
-    print(f'Request counter: {counter}')
-    ip_info= get_ip_info(args.ip)
-    for key,value in ip_info.items():
-        print(f"{key}: {value}")
+                    data = match.groupdict()
+
+                    if args.c == "y":
+                        ip_counter[data['ip']] += 1
+
+                    ip_match = args.ip is None or args.ip == data['ip']
+                    log_datetime = date_time_parser(data['datetime'])
+                    time_match = args.dt is None or args.dt == log_datetime
+                    request_match = args.r is None or args.r.upper() in data['request']
+                    if ip_match and time_match and request_match:
+                        counter += 1
+                        print(f"DateTime: {data['datetime']}")
+                        print(f"IP: {data['ip']}")
+                        print(f"Request: {data['request']}")
+                        print(f"Http: {data['http']}")
+                        print(f"Status: {data['status']}")
+                        print('-'*90)
+
+                else:
+                    print("No match")
+        print('\n\n')
+        for ip , cnt in ip_counter.most_common():
+            print(f"{ip}: {cnt} so'ro'v")
+            print("-"*50)
+
+
+        try:
+            if counter != 0:
+                print(f'Request counter: {counter}')
+                ip_info= get_ip_info(args.ip)
+                for key,value in ip_info.items():
+                    print(f"{key}: {value}")
+            print('No request')
+        except Exception:
+            print(f"No IP address")
+
+    except FileNotFoundError:
+        print("No such file or directory")
 
 
 
