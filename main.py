@@ -24,7 +24,7 @@ def access_log():
     parser.add_argument("-ip",type=str, metavar="--ipaddress", help="IP address to filter")
     
     parser.add_argument("-dt",type=str, metavar="--datetime", help="DataTime to filter example '2021-08-10'")
- parser.add_argument("-s",type=str, metavar="--ststusCode", help="Status code to filter example '2021-08-10'")
+    parser.add_argument("-s",type=str, metavar="--ststusCode", help="Status code to filter example '2021-08-10'")
     args = parser.parse_args()
 
 
@@ -66,14 +66,17 @@ def access_log():
                 else:
                     print("No match")
         print('\n\n')
-        for ip , cnt in ip_counter.most_common():
-            print(f"{ip}: {cnt} so'ro'v")
-            print("-"*50)
+        if args.c == 'y':
+            with open('ip', 'w', encoding='utf-8') as f:
+                for ip, cnt in ip_counter.most_common():
+                    f.write(f"{ip}: {cnt} so'ro'v\n")
 
+                print("-"*50)
+
+        print(f'Request counter: {counter}')
 
         try:
             if counter != 0:
-                print(f'Request counter: {counter}')
                 ip_info= get_ip_info(args.ip)
                 for key,value in ip_info.items():
                     print(f"{key}: {value}")
