@@ -22,7 +22,8 @@ def access_log():
     parser.add_argument("-r",type=str, metavar="--request", help="Requests type post or get ")
     parser.add_argument("-p",type=str, metavar="--path", help="Log file path input")
     parser.add_argument("-ip",type=str, metavar="--ipaddress", help="IP address to filter")
-    
+    parser.add_argument("-rp",type=str, metavar="--requestpath", help="Request path to filter")
+
     parser.add_argument("-dt",type=str, metavar="--datetime", help="DataTime to filter example '2021-08-10'")
     parser.add_argument("-s",type=str, metavar="--ststusCode", help="Status code to filter example '2021-08-10'")
     args = parser.parse_args()
@@ -30,10 +31,13 @@ def access_log():
 
     # Dict ko'rinishida filterlash
     log_pattern = re.compile(
-        r'(?P<ip>\d{1,3}(?:\.\d{1,3}){3})\s+-\s+-\s+' 
-        r'\[(?P<datetime>[^\]]+)\]\s+'  
-        r'"(?P<request>[^"]+)"\s+'  
-        r'(?P<status>\d{3})\s+'  
+        # r"(?P<sql>union.*select)|"  # SQL Injection
+        # r"(?P<taversal>\.\./)|"  # Path Traversal
+        # r"(?P<xss><script>)|"  # XSS
+        r'(?P<ip>\d{1,3}(?:\.\d{1,3}){3})\s+-\s+-\s+'
+        r'\[(?P<datetime>[^\]]+)\]\s+'
+        r'"(?P<request>[^"]+)"\s+'
+        r'(?P<status>\d{3})\s+'
         r'\d+\s+"(?P<http>[^"]+)"',
         re.MULTILINE
     )
@@ -53,8 +57,10 @@ def access_log():
                     log_datetime = date_time_parser(data['datetime'])
                     time_match = args.dt is None or args.dt == log_datetime
                     request_match = args.r is None or args.r.upper() in data['request']
+                    request_path = args.rp is None or args.rp in data['request'].lower()
                     status_match = args.s is None or args.s in data['status']
-                    if ip_match and time_match and request_match and status_match:
+
+                    if ip_match and time_match and request_match and status_match and request_path:
                         counter += 1
                         print(f"DateTime: {data['datetime']}")
                         print(f"IP: {data['ip']}")
