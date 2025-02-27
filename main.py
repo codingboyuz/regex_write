@@ -22,6 +22,7 @@ def access_log():
     parser.add_argument("-r",type=str, metavar="--request", help="Requests type post or get ")
     parser.add_argument("-p",type=str, metavar="--path", help="Log file path input")
     parser.add_argument("-ip",type=str, metavar="--ipaddress", help="IP address to filter")
+    parser.add_argument("-a",type=str, metavar="--agent", help="IP address to filter")
     parser.add_argument("-rp",type=str, metavar="--requestpath", help="Request path to filter  example: wp-admin or wp-login ")
 
     parser.add_argument("-dt",type=str, metavar="--datetime", help="DataTime to filter example '2021-08-10'")
@@ -38,7 +39,8 @@ def access_log():
         r'\[(?P<datetime>[^\]]+)\]\s+'
         r'"(?P<request>[^"]+)"\s+'
         r'(?P<status>\d{3})\s+'
-        r'\d+\s+"(?P<http>[^"]+)"',
+        r'\d+\s+"(?P<http>[^"]+)"\s+'
+        r'"(?P<user_agent>[^"]+)"',
         re.MULTILINE
     )
 
@@ -59,12 +61,14 @@ def access_log():
                     request_match = args.r is None or args.r.upper() in data['request']
                     request_path = args.rp is None or args.rp in data['request'].lower()
                     status_match = args.s is None or args.s in data['status']
+                    agent_match = args.a is None or args.a in data['user_agent']
 
                     if ip_match and time_match and request_match and status_match and request_path:
                         counter += 1
                         print(f"DateTime: {data['datetime']}")
                         print(f"IP: {data['ip']}")
                         print(f"Request: {data['request']}")
+                        print(f"User agent: {data['user_agent']}")
                         print(f"Http: {data['http']}")
                         print(f"Status: {data['status']}")
                         print('-'*90)
