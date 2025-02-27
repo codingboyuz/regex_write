@@ -22,7 +22,7 @@ def access_log():
     parser.add_argument("-r",type=str, metavar="--request", help="Requests type post or get ")
     parser.add_argument("-p",type=str, metavar="--path", help="Log file path input")
     parser.add_argument("-ip",type=str, metavar="--ipaddress", help="IP address to filter")
-    parser.add_argument("-rp",type=str, metavar="--requestpath", help="Request path to filter")
+    parser.add_argument("-rp",type=str, metavar="--requestpath", help="Request path to filter  example: wp-admin or wp-login ")
 
     parser.add_argument("-dt",type=str, metavar="--datetime", help="DataTime to filter example '2021-08-10'")
     parser.add_argument("-s",type=str, metavar="--ststusCode", help="Status code to filter example '2021-08-10'")
