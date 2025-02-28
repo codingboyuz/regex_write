@@ -4,6 +4,36 @@ from datetime import datetime
 
 from get_ip_info import get_ip_info
 from collections import Counter
+
+
+
+
+
+from typing import Any
+
+import requests
+
+def get_ip_info(ip: str) -> str | dict[str, str | Any]:
+    try:
+        response = requests.get(f"http://ip-api.com/json/{ip}")
+        data = response.json()
+        if data['status'] == 'fail':
+            return "Ma'lumot topilmadi!"
+        info = {
+            "IP": data.get("query", "Aniqlanmadi"),
+            "Mamlakat": data.get("country", "Aniqlanmadi"),
+            "Shahar": data.get("city", "Aniqlanmadi"),
+            "ISP (provayder)": data.get("isp", "Aniqlanmadi"),
+            "Tashkilot": data.get("org", "Aniqlanmadi"),
+            "Hudud": data.get("regionName", "Aniqlanmadi"),
+            "Koordinatalar": f"{data.get('lat', 'Aniqlanmadi')}, {data.get('lon', 'Aniqlanmadi')}",
+            "Tarmoq": data.get("as", "Aniqlanmadi"),
+        }
+        return info
+    except requests.RequestException:
+        return "Ma'lumot olishda xatolik yuz berdi!"
+
+
 def date_time_parser(date_time):
     # DateTime formatiga o'girish
     parsed_time = datetime.strptime(date_time, "%d/%b/%Y:%H:%M:%S %z")
@@ -24,9 +54,8 @@ def access_log():
     parser.add_argument("-ip",type=str, metavar="--ipaddress", help="IP address to filter")
     parser.add_argument("-a",type=str, metavar="--agent", help="IP address to filter")
     parser.add_argument("-rp",type=str, metavar="--requestpath", help="Request path to filter  example: wp-admin or wp-login ")
-
     parser.add_argument("-dt",type=str, metavar="--datetime", help="DataTime to filter example '2021-08-10'")
-    parser.add_argument("-s",type=str, metavar="--ststusCode", help="Status code to filter example '2021-08-10'")
+    parser.add_argument("-s",type=str, metavar="--ststusCode", help="Status code to filter example 200 or 500")
     args = parser.parse_args()
 
 
@@ -102,3 +131,5 @@ def access_log():
 
 if __name__ == '__main__':
     access_log()
+
+

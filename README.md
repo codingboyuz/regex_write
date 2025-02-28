@@ -1,5 +1,108 @@
-Regular expression (regex) — bu matn ichidagi ma'lumotlarni qidirish, almashtirish yoki ajratib olish uchun yaratilgan kuchli vosita. Quyida regex yozishni bosqichma-bosqich o‘rganish uchun asosiy tushunchalar va misollar keltirilgan.
+# **Loglarni tahlil qilish dasturi**  
 
+Ushbu dastur Apache yoki Nginx server loglarini tahlil qilish uchun mo‘ljallangan. Log faylni o‘qib, IP-manzillar, so‘rov turlari, status kodlari va boshqa ma’lumotlarni filtrlash imkonini beradi.  
+
+## **O‘rnatish**  
+Dasturdan foydalanish uchun quyidagi kutubxonalar talab qilinadi:  
+
+```bash
+pip install requests
+```
+
+## **Foydalanish**  
+Dasturdan foydalanish uchun `main.py` faylini ishga tushirish kerak:  
+
+```bash
+python main.py -p log_file_path
+```
+
+### **Qo‘llab-quvvatlanadigan argumentlar:**  
+- `-p` — Log fayl yo‘li (majburiy)  
+- `-ip` — Faqat berilgan IP-manzil bo‘yicha filtr  
+- `-dt` — Sana bo‘yicha filtr (`YYYY-MM-DD` formatida)  
+- `-r` — So‘rov turi (`GET`, `POST`, va h.k.)  
+- `-s` — Status kodi (`200`, `404`, va h.k.)  
+- `-rp` — So‘rov yo‘li bo‘yicha filtr (`wp-admin`, `wp-login`, va h.k.)  
+- `-a` — User-agent bo‘yicha filtr  
+- `-c y` — Barcha IP-manzillarning so‘rovlar sonini hisoblash  
+
+### **Misollar va natijalar**  
+
+#### **1. Log faylni tahlil qilish:**  
+```bash
+python main.py -p access.log
+```
+**Natija:**  
+```
+DateTime: 27/Feb/2024:12:30:15 +0000
+IP: 192.168.1.1
+Request: GET /index.html HTTP/1.1
+User agent: Mozilla/5.0
+Http: https://example.com
+Status: 200
+------------------------------------------------------------------------------------------
+Request counter: 1
+```
+
+#### **2. Muayyan IP bo‘yicha filtrlash:**  
+```bash
+python main.py -p access.log -ip 192.168.1.1
+```
+**Natija:**  
+```
+DateTime: 27/Feb/2024:12:30:15 +0000
+IP: 192.168.1.1
+Request: GET /index.html HTTP/1.1
+User agent: Mozilla/5.0
+Http: https://example.com
+Status: 200
+------------------------------------------------------------------------------------------
+Request counter: 1
+
+IP haqida ma'lumot:
+IP: 192.168.1.1
+Mamlakat: USA
+Shahar: New York
+ISP (provayder): AT&T
+Tashkilot: AT&T Services Inc.
+Hudud: New York
+Koordinatalar: 40.7128, -74.0060
+Tarmoq: AS7018 AT&T Services Inc.
+```
+
+#### **3. GET so‘rovlarini chiqarish:**  
+```bash
+python main.py -p access.log -r GET
+```
+**Natija:**  
+```
+DateTime: 27/Feb/2024:12:30:15 +0000
+IP: 192.168.1.1
+Request: GET /index.html HTTP/1.1
+User agent: Mozilla/5.0
+Http: https://example.com
+Status: 200
+------------------------------------------------------------------------------------------
+Request counter: 1
+```
+
+#### **4. Barcha IP-larning so‘rovlar sonini hisoblash:**  
+```bash
+python main.py -p access.log -c y
+```
+**Natija (`ip` fayliga yoziladi):**  
+```
+192.168.1.1: 10 so'ro'v
+192.168.1.2: 7 so'ro'v
+192.168.1.3: 5 so'ro'v
+```
+
+## **Muammo va xatolar**  
+- Agar log fayli topilmasa: `No such file or directory`  
+- Agar mos keluvchi log topilmasa: `No match`  
+- Agar IP haqida ma’lumot olinmasa: `Ma'lumot topilmadi!`  
+
+Dastur log tahlil qilish va xavfsizlik monitoringi uchun foydali hisoblanadi.
 ---
 
 ## 1. Asosiy tushunchalar
